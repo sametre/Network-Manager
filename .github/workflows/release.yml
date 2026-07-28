@@ -39,7 +39,14 @@ jobs:
           Compress-Archive -Path "$pkg/*" `
             -DestinationPath "dist/NetworkManager-$ver-Windows-x64.zip"
 
-      # ── 4. Private repo'nun kendi Release'ına yükle ───────────────────
+      # ── 4. Inno Setup ile Türkçe Setup Hazırla ────────────────────────
+      - name: Compile Inno Setup Installer
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
+          Move-Item "Output/NetworkManager-Setup.exe" "dist/NetworkManager-Setup.exe"
+
+      # ── 5. Private repo'nun kendi Release'ına yükle ───────────────────
       - name: Create GitHub Release (private repo)
         uses: softprops/action-gh-release@v2
         with:
@@ -48,19 +55,20 @@ jobs:
           body: |
             ## Network Manager ${{ github.ref_name }}
 
-            Windows x64 derlemesi otomatik olarak oluşturuldu.
+            Windows x64 kurulum paketi ve taşınabilir sürüm oluşturuldu.
 
-            ### Kurulum
-            1. ZIP dosyasını indirin ve çıkartın.
-            2. `NetworkManager.exe` dosyasını **Yönetici olarak çalıştırın**.
-            3. Adaptörünüzü seçin ve IP ayarlarını yapılandırın.
-          files: dist/NetworkManager-${{ github.ref_name }}-Windows-x64.zip
+            ### Kurulum Seçenekleri
+            1. **Setup Yöntemi (Önerilen):** `NetworkManager-Setup.exe` dosyasını indirin ve çalıştırın. Masaüstünüze kısayol oluşturulacaktır.
+            2. **Taşınabilir (Portable):** `NetworkManager-${{ github.ref_name }}-Windows-x64.zip` dosyasını indirip bir klasöre çıkartın.
+          files: |
+            dist/NetworkManager-${{ github.ref_name }}-Windows-x64.zip
+            dist/NetworkManager-Setup.exe
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 5. Public Release repo'suna da yükle ─────────────────────────
+      # ── 6. Public Release repo'suna da yükle ─────────────────────────
       - name: Publish EXE to Public Releases Repo
         uses: softprops/action-gh-release@v2
         with:
@@ -69,22 +77,24 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: "Network Manager ${{ github.ref_name }}"
           body: |
-            ## Network Manager ${{ github.ref_name }}
+            ## Network Manager Windows Sürümü (${{ github.ref_name }})
 
-            PC ile POS cihazı arasındaki yerel ağ iletişimini kararlı tutan Windows ağ profil yöneticisi.
+            PC ile POS cihazı arasındaki yerel ağ iletişimini kararlı tutmak için hazırlanmış ağ profil yöneticisi.
 
-            ### 📥 İndirme
-            Aşağıdaki ZIP dosyasını indirin, çıkartın ve `NetworkManager.exe` dosyasını **Yönetici olarak çalıştırın**.
+            ### 📥 İndirme Seçenekleri
+            * **[→ Türkçe Kolay Kurulum (Setup)](https://github.com/aptus0/Network-Manager-Releases/releases/download/${{ github.ref_name }}/NetworkManager-Setup.exe)** (`NetworkManager-Setup.exe`)
+            * **[→ Taşınabilir Paket (Portable ZIP)](https://github.com/aptus0/Network-Manager-Releases/releases/download/${{ github.ref_name }}/NetworkManager-${{ github.ref_name }}-Windows-x64.zip)** (`.zip` formatında arşiv)
 
-            ### ✅ Gereksinimler
-            - Windows 10 / 11 (x64)
-            - Yönetici yetkisi
+            ### ✅ Sistem Gereksinimleri
+            * Windows 10 / 11 (64-bit)
+            * Ağ ayarlarını değiştirebilmek için **Yönetici (Administrator)** yetkisi
 
-            ### 🔧 Kullanım
-            1. Programı açın — Windows yönetici izni isteyecektir.
-            2. PC ile modeme bağlı ağ adaptörünü seçin.
-            3. PC IP: `192.168.1.10`, POS IP: `192.168.1.11` olarak ayarlayın.
-            4. **Sabit IP Uygula** düğmesine basın.
-          files: dist/NetworkManager-${{ github.ref_name }}-Windows-x64.zip
+            ### 🔧 Kurulum ve Başlangıç
+            1. Setup dosyasını çalıştırıp kurulum adımlarını takip edin.
+            2. Masaüstündeki veya Başlat menüsündeki **Network Manager** kısayoluna çift tıklayın.
+            3. Ağ adaptörünüzü seçin ve IP adreslerini belirleyerek **Sabit IP Uygula** butonuna basın.
+          files: |
+            dist/NetworkManager-${{ github.ref_name }}-Windows-x64.zip
+            dist/NetworkManager-Setup.exe
           draft: false
           prerelease: false
