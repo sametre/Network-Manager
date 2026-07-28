@@ -1,4 +1,4 @@
-name: Release — Publish EXE to Public Repo
+name: Release - Publish EXE to Public Repo
 
 on:
   push:
@@ -12,41 +12,33 @@ jobs:
       contents: write
 
     steps:
-      # ── 1. Kaynak kodu indir (Private repo) ──────────────────────────
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # ── 2. CMake ile Release derle ────────────────────────────────────
       - name: Configure CMake (x64 Release)
         run: cmake -S . -B build-ci -G "Visual Studio 17 2022" -A x64
 
       - name: Build EXE
         run: cmake --build build-ci --config Release --parallel
 
-      # ── 3. ZIP paketi hazırla ─────────────────────────────────────────
       - name: Prepare release package
         shell: pwsh
         run: |
           $ver = "${{ github.ref_name }}"
           $pkg = "dist/NetworkManager"
           New-Item -ItemType Directory -Force -Path $pkg | Out-Null
-
           Copy-Item "build-ci/release/PcPosNetworkManager.exe" "$pkg/NetworkManager.exe"
-          Copy-Item "config.example.ini"                        "$pkg/config.ini"
-          Copy-Item "README.md"                                 "$pkg/README.md"
+          Copy-Item "config.example.ini" "$pkg/config.ini"
+          Copy-Item "README.md" "$pkg/README.md"
           New-Item -ItemType Directory -Force -Path "$pkg/logs" | Out-Null
+          Compress-Archive -Path "$pkg/*" -DestinationPath "dist/NetworkManager-$ver-Windows-x64.zip"
 
-          Compress-Archive -Path "$pkg/*" `
-            -DestinationPath "dist/NetworkManager-$ver-Windows-x64.zip"
-
-      # ── 4. Inno Setup ile Türkçe Setup Hazırla ────────────────────────
       - name: Compile Inno Setup Installer
         shell: pwsh
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
           Move-Item "Output/NetworkManager-Setup.exe" "dist/NetworkManager-Setup.exe"
 
-      # ── 5. Private repo'nun kendi Release'ına yükle ───────────────────
       - name: Create GitHub Release (private repo)
         uses: softprops/action-gh-release@v2
         with:
@@ -54,12 +46,7 @@ jobs:
           name: "Network Manager ${{ github.ref_name }}"
           body: |
             ## Network Manager ${{ github.ref_name }}
-
-            Windows x64 kurulum paketi ve taşınabilir sürüm oluşturuldu.
-
-            ### Kurulum Seçenekleri
-            1. **Setup Yöntemi (Önerilen):** `NetworkManager-Setup.exe` dosyasını indirin ve çalıştırın. Masaüstünüze kısayol oluşturulacaktır.
-            2. **Taşınabilir (Portable):** `NetworkManager-${{ github.ref_name }}-Windows-x64.zip` dosyasını indirip bir klasöre çıkartın.
+            Windows x64 kurulum paketi ve tasinabilir surum olusturuldu.
           files: |
             dist/NetworkManager-${{ github.ref_name }}-Windows-x64.zip
             dist/NetworkManager-Setup.exe
@@ -68,7 +55,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 6. Public Release repo'suna da yükle ─────────────────────────
       - name: Publish EXE to Public Releases Repo
         uses: softprops/action-gh-release@v2
         with:
@@ -77,22 +63,8 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: "Network Manager ${{ github.ref_name }}"
           body: |
-            ## Network Manager Windows Sürümü (${{ github.ref_name }})
-
-            PC ile POS cihazı arasındaki yerel ağ iletişimini kararlı tutmak için hazırlanmış ağ profil yöneticisi.
-
-            ### 📥 İndirme Seçenekleri
-            * **[→ Türkçe Kolay Kurulum (Setup)](https://github.com/aptus0/Network-Manager-Releases/releases/download/${{ github.ref_name }}/NetworkManager-Setup.exe)** (`NetworkManager-Setup.exe`)
-            * **[→ Taşınabilir Paket (Portable ZIP)](https://github.com/aptus0/Network-Manager-Releases/releases/download/${{ github.ref_name }}/NetworkManager-${{ github.ref_name }}-Windows-x64.zip)** (`.zip` formatında arşiv)
-
-            ### ✅ Sistem Gereksinimleri
-            * Windows 10 / 11 (64-bit)
-            * Ağ ayarlarını değiştirebilmek için **Yönetici (Administrator)** yetkisi
-
-            ### 🔧 Kurulum ve Başlangıç
-            1. Setup dosyasını çalıştırıp kurulum adımlarını takip edin.
-            2. Masaüstündeki veya Başlat menüsündeki **Network Manager** kısayoluna çift tıklayın.
-            3. Ağ adaptörünüzü seçin ve IP adreslerini belirleyerek **Sabit IP Uygula** butonuna basın.
+            ## Network Manager Windows Surumu (${{ github.ref_name }})
+            PC ile POS cihazi arasindaki yerel ag iletisimini kararli tutmak icin hazirlanmis ag profil yoneticisi.
           files: |
             dist/NetworkManager-${{ github.ref_name }}-Windows-x64.zip
             dist/NetworkManager-Setup.exe

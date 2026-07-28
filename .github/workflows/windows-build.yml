@@ -3,7 +3,9 @@ name: Windows x64 Build
 on:
   workflow_dispatch:
   push:
-    branches: ["main", "master"]
+    branches:
+      - main
+      - master
     paths:
       - "src/**"
       - "resources/**"
