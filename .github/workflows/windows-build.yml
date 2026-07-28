@@ -1,0 +1,47 @@
+name: Windows x64 Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "src/**"
+      - "resources/**"
+      - "CMakeLists.txt"
+      - ".github/workflows/windows-build.yml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "resources/**"
+      - "CMakeLists.txt"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure x64 Release
+        run: cmake -S . -B build-ci -G "Visual Studio 17 2022" -A x64
+
+      - name: Build
+        run: cmake --build build-ci --config Release --parallel
+
+      - name: Prepare portable package
+        shell: pwsh
+        run: |
+          $package = "artifact/NetworkManager"
+          New-Item -ItemType Directory -Force -Path $package | Out-Null
+          Copy-Item "build-ci/release/PcPosNetworkManager.exe" "$package/NetworkManager.exe"
+          Copy-Item "config.example.ini" "$package/config.ini"
+          Copy-Item "README.md" "$package/README.md"
+          New-Item -ItemType Directory -Force -Path "$package/logs" | Out-Null
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetworkManager-Windows-x64
+          path: artifact/NetworkManager
+          if-no-files-found: error

@@ -1,0 +1,46 @@
+# Build çıktıları
+build/*
+!build/.gitkeep
+release/*
+!release/.gitkeep
+out/*
+output/*
+
+# Derleyici ara dosyaları
+*.obj
+*.o
+*.res
+
+# Çalıştırılabilir dosyalar (kaynak repoya dahil edilmez)
+*.exe
+
+# Log dosyaları
+*.log
+
+# Kullanıcıya özgü yapılandırma (örnek dosya commit'lenir)
+config.ini
+
+# Dağıtım paketleri
+PcPosNetworkManager-*.zip
+NetworkManager-*.zip
+dist/
+
+# IDE / Editor dosyaları
+.vs/
+*.user
+*.suo
+.vscode/
+
+# CMake geçici dosyaları
+build-cmake/
+build-ci/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# .NET derleme önbellekleri
+**/obj/
+**/bin/
+*.user
+*.suo
+*.csproj.user

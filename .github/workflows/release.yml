@@ -1,0 +1,90 @@
+name: Release — Publish EXE to Public Repo
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      # ── 1. Kaynak kodu indir (Private repo) ──────────────────────────
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # ── 2. CMake ile Release derle ────────────────────────────────────
+      - name: Configure CMake (x64 Release)
+        run: cmake -S . -B build-ci -G "Visual Studio 17 2022" -A x64
+
+      - name: Build EXE
+        run: cmake --build build-ci --config Release --parallel
+
+      # ── 3. ZIP paketi hazırla ─────────────────────────────────────────
+      - name: Prepare release package
+        shell: pwsh
+        run: |
+          $ver = "${{ github.ref_name }}"
+          $pkg = "dist/NetworkManager"
+          New-Item -ItemType Directory -Force -Path $pkg | Out-Null
+
+          Copy-Item "build-ci/release/PcPosNetworkManager.exe" "$pkg/NetworkManager.exe"
+          Copy-Item "config.example.ini"                        "$pkg/config.ini"
+          Copy-Item "README.md"                                 "$pkg/README.md"
+          New-Item -ItemType Directory -Force -Path "$pkg/logs" | Out-Null
+
+          Compress-Archive -Path "$pkg/*" `
+            -DestinationPath "dist/NetworkManager-$ver-Windows-x64.zip"
+
+      # ── 4. Private repo'nun kendi Release'ına yükle ───────────────────
+      - name: Create GitHub Release (private repo)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Network Manager ${{ github.ref_name }}"
+          body: |
+            ## Network Manager ${{ github.ref_name }}
+
+            Windows x64 derlemesi otomatik olarak oluşturuldu.
+
+            ### Kurulum
+            1. ZIP dosyasını indirin ve çıkartın.
+            2. `NetworkManager.exe` dosyasını **Yönetici olarak çalıştırın**.
+            3. Adaptörünüzü seçin ve IP ayarlarını yapılandırın.
+          files: dist/NetworkManager-${{ github.ref_name }}-Windows-x64.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 5. Public Release repo'suna da yükle ─────────────────────────
+      - name: Publish EXE to Public Releases Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.RELEASES_TOKEN }}
+          repository: ${{ github.repository_owner }}/Network-Manager-Releases
+          tag_name: ${{ github.ref_name }}
+          name: "Network Manager ${{ github.ref_name }}"
+          body: |
+            ## Network Manager ${{ github.ref_name }}
+
+            PC ile POS cihazı arasındaki yerel ağ iletişimini kararlı tutan Windows ağ profil yöneticisi.
+
+            ### 📥 İndirme
+            Aşağıdaki ZIP dosyasını indirin, çıkartın ve `NetworkManager.exe` dosyasını **Yönetici olarak çalıştırın**.
+
+            ### ✅ Gereksinimler
+            - Windows 10 / 11 (x64)
+            - Yönetici yetkisi
+
+            ### 🔧 Kullanım
+            1. Programı açın — Windows yönetici izni isteyecektir.
+            2. PC ile modeme bağlı ağ adaptörünü seçin.
+            3. PC IP: `192.168.1.10`, POS IP: `192.168.1.11` olarak ayarlayın.
+            4. **Sabit IP Uygula** düğmesine basın.
+          files: dist/NetworkManager-${{ github.ref_name }}-Windows-x64.zip
+          draft: false
+          prerelease: false
