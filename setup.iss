@@ -3,7 +3,7 @@
 
 #define MyAppName "Network Manager"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "aptus0"
+#define MyAppPublisher "sametre"
 #define MyAppExeName "NetworkManager.exe"
 
 [Setup]
