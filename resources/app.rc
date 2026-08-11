@@ -21,7 +21,7 @@ BEGIN
         MENUITEM "&Hakkında", IDM_HELP_ABOUT
         MENUITEM "&Destek", IDM_HELP_SUPPORT
         MENUITEM SEPARATOR
-        MENUITEM "GitHub (github.com/aptus0)", IDM_GITHUB
+        MENUITEM "GitHub (github.com/sametre)", IDM_GITHUB
         MENUITEM "Web Sitesi (temasre.shop)", IDM_WEBSITE
     END
 END
@@ -37,7 +37,7 @@ BEGIN
     IDS_MENU_HELP            "Yardım"
     IDS_MENU_ABOUT           "Hakkında"
     IDS_MENU_SUPPORT         "Destek"
-    IDS_MENU_GITHUB          "GitHub: github.com/aptus0"
+    IDS_MENU_GITHUB          "GitHub: github.com/sametre"
     IDS_MENU_WEBSITE         "Web: temasre.shop"
     IDS_STATUS_READY         "Hazır"
     IDS_LICENSE_ACTIVE       "Lisans: Aktif"

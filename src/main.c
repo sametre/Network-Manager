@@ -836,12 +836,12 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM w_param, L
                                L"Destek için lütfen bize ulaşın:\n\n"
                                L"E-mail: support@temasre.shop\n"
                                L"Web: temasre.shop\n"
-                               L"GitHub: github.com/aptus0",
+                               L"GitHub: github.com/sametre",
                                L"Destek", MB_OK | MB_ICONINFORMATION);
                     return 0;
 
                 case IDM_GITHUB:
-                    ShellExecuteW(window, L"open", L"https://github.com/aptus0", 
+                    ShellExecuteW(window, L"open", L"https://github.com/sametre", 
                                  NULL, NULL, SW_SHOW);
                     return 0;
 
